@@ -75,8 +75,8 @@ public class BPCacheJDBCBase extends BPCacheBase implements BPCacheJDBC
 			{
 				long ct = System.currentTimeMillis();
 				BPResourceJDBCLink jdbclink = (BPResourceJDBCLink) t;
-				BPJDBCContextBase context = new BPJDBCContextBase(jdbclink);
-				try
+
+				try (BPJDBCContextBase context = new BPJDBCContextBase(jdbclink))
 				{
 					DBStruct ds = context.list().toCompletableFuture().get();
 					m_data.put(jdbclink.getCacheKey(), ds);
@@ -95,8 +95,8 @@ public class BPCacheJDBCBase extends BPCacheBase implements BPCacheJDBC
 				BPResourceDBTable table = (BPResourceDBTable) t;
 				BPResourceDBSchema schema = (BPResourceDBSchema) table.getParentResource();
 				BPResourceJDBCLink jdbclink = table.getJDBCLink();
-				BPJDBCContextBase context = new BPJDBCContextBase(jdbclink);
-				try
+
+				try (BPJDBCContextBase context = new BPJDBCContextBase(jdbclink))
 				{
 					List<String> tablename = new CopyOnWriteArrayList<String>(new String[] { schema.getName().length() == 0 ? table.getName() : schema.getName() + "." + table.getName() });
 					context.listColumns(tablename, m_data.get(jdbclink.getCacheKey())).toCompletableFuture().get();

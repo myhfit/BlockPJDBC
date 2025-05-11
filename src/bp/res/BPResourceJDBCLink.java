@@ -24,6 +24,7 @@ public class BPResourceJDBCLink extends BPResourceOverlay
 	protected volatile String m_url;
 	protected volatile String m_user;
 	protected volatile String m_password;
+	protected volatile String m_dbcats;
 
 	public final static String RESTYPE_JDBCLINK = "jdbclink";
 
@@ -72,6 +73,11 @@ public class BPResourceJDBCLink extends BPResourceOverlay
 		return m_name;
 	}
 
+	public String getDBCats()
+	{
+		return m_dbcats;
+	}
+
 	public Map<String, Object> getMappedData()
 	{
 		Map<String, Object> rc = new HashMap<String, Object>();
@@ -80,6 +86,7 @@ public class BPResourceJDBCLink extends BPResourceOverlay
 		rc.put("url", m_url);
 		rc.put("user", m_user);
 		rc.put("password", m_password);
+		rc.put("dbcats", m_dbcats);
 		return rc;
 	}
 
@@ -90,6 +97,7 @@ public class BPResourceJDBCLink extends BPResourceOverlay
 		m_url = (String) data.get("url");
 		m_user = (String) data.get("user");
 		m_password = (String) data.get("password");
+		m_dbcats = (String) data.get("dbcats");
 	}
 
 	public String getDriver()

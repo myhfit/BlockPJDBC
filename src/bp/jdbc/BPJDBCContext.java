@@ -1,5 +1,6 @@
 package bp.jdbc;
 
+import java.io.Closeable;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -8,7 +9,7 @@ import bp.data.BPXYDData;
 import bp.data.BPXYData;
 import bp.res.BPResourceJDBCLink;
 
-public interface BPJDBCContext
+public interface BPJDBCContext extends Closeable
 {
 	CompletionStage<Void> setJDBCLink(BPResourceJDBCLink link);
 
@@ -23,7 +24,7 @@ public interface BPJDBCContext
 	CompletionStage<BPXYDData> startQuery(String sql, Object[] params);
 
 	CompletionStage<BPXYDData> startQuery(String sql, Object[] params, Consumer<BPXYDData> preparecallback);
-	
+
 	CompletionStage<BPXYData> query(String sql, Object[] params);
 
 	CompletionStage<BPXYDData> resumeQuery(Consumer<BPXYDData> preparecallback);
@@ -39,4 +40,6 @@ public interface BPJDBCContext
 	void open();
 
 	void close();
+
+	BPResourceJDBCLink getJDBCLink();
 }

@@ -26,16 +26,30 @@ public class BPJDBCContextBase implements BPJDBCContext
 	protected ExecutorService m_exec;
 	protected ExecutorService m_execback;
 	protected volatile AtomicBoolean m_stoprunflag = new AtomicBoolean(false);
+	protected volatile WeakReference<BPResourceJDBCLink> m_linkref;
 
 	public BPJDBCContextBase(BPResourceJDBCLink link)
 	{
+		m_linkref = new WeakReference<BPResourceJDBCLink>(link);
 		m_exec = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag));
 		m_execback = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag));
 	}
 
 	public CompletionStage<Void> setJDBCLink(BPResourceJDBCLink link)
 	{
+		m_linkref = new WeakReference<BPResourceJDBCLink>(link);
+		CompletableFuture.supplyAsync(new BPJDBCContextSegs.BPJDBCContextSegChangeJDBCLink(link), m_execback);
 		return CompletableFuture.supplyAsync(new BPJDBCContextSegs.BPJDBCContextSegChangeJDBCLink(link), m_exec);
+	}
+
+	public BPResourceJDBCLink getJDBCLink()
+	{
+		WeakReference<BPResourceJDBCLink> linkref = m_linkref;
+		if (linkref != null)
+		{
+			return linkref.get();
+		}
+		return null;
 	}
 
 	public void open()
@@ -44,12 +58,21 @@ public class BPJDBCContextBase implements BPJDBCContext
 
 	public void close()
 	{
+		m_linkref = null;
 		ExecutorService exec = m_exec;
 		ExecutorService execback = m_execback;
 		m_exec = null;
 		m_execback = null;
-		exec.shutdown();
-		execback.shutdown();
+		if (exec != null)
+		{
+			exec.submit(() -> (new BPJDBCContextSegs.BPJDBCContextSegDisconnect()).get());
+			exec.shutdown();
+		}
+		if (execback != null)
+		{
+			execback.submit(() -> (new BPJDBCContextSegs.BPJDBCContextSegDisconnect()).get());
+			execback.shutdown();
+		}
 	}
 
 	public CompletionStage<DBStruct> list()
