@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 
 import bp.data.BPXYDData;
 import bp.data.BPXYData;
+import bp.env.BPEnv;
+import bp.env.BPEnvDynamic;
 import bp.res.BPResourceJDBCLink;
 import bp.res.BPResourceJDBCLink.DBStruct;
 import bp.util.ClassUtil;
@@ -27,12 +29,14 @@ public class BPJDBCContextBase implements BPJDBCContext
 	protected ExecutorService m_execback;
 	protected volatile AtomicBoolean m_stoprunflag = new AtomicBoolean(false);
 	protected volatile WeakReference<BPResourceJDBCLink> m_linkref;
+	protected volatile BPEnv m_env;
 
 	public BPJDBCContextBase(BPResourceJDBCLink link)
 	{
+		m_env = new BPJDBCContextEnv();
 		m_linkref = new WeakReference<BPResourceJDBCLink>(link);
-		m_exec = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag));
-		m_execback = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag));
+		m_exec = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag, m_env));
+		m_execback = Executors.newSingleThreadExecutor(new JDBCThreadFactory(link, m_stoprunflag, m_env));
 	}
 
 	public CompletionStage<Void> setJDBCLink(BPResourceJDBCLink link)
@@ -56,6 +60,11 @@ public class BPJDBCContextBase implements BPJDBCContext
 	{
 	}
 
+	public void setEnv(String key, String value)
+	{
+		m_env.setEnv(key, value);
+	}
+
 	public void close()
 	{
 		m_linkref = null;
@@ -73,6 +82,11 @@ public class BPJDBCContextBase implements BPJDBCContext
 			execback.submit(() -> (new BPJDBCContextSegs.BPJDBCContextSegDisconnect()).get());
 			execback.shutdown();
 		}
+	}
+
+	public <T> CompletionStage<T> runSegment(Supplier<T> seg)
+	{
+		return CompletableFuture.supplyAsync(seg, m_exec);
 	}
 
 	public CompletionStage<DBStruct> list()
@@ -155,22 +169,41 @@ public class BPJDBCContextBase implements BPJDBCContext
 	{
 		protected volatile BPResourceJDBCLink m_link;
 		protected WeakReference<AtomicBoolean> m_stoprunflag;
+		protected volatile BPEnv m_env;
 
-		public JDBCThreadFactory(BPResourceJDBCLink link, AtomicBoolean stoprunflag)
+		public JDBCThreadFactory(BPResourceJDBCLink link, AtomicBoolean stoprunflag, BPEnv env)
 		{
 			m_link = link;
 			m_stoprunflag = new WeakReference<AtomicBoolean>(stoprunflag);
+			m_env = env;
 		}
 
 		public Thread newThread(Runnable r)
 		{
-			Thread t = new JDBCThread(m_link, r, m_stoprunflag);
+			JDBCThread t = new JDBCThread(m_link, r, m_stoprunflag);
+			BPEnv env = m_env;
+			if (env != null)
+				t.setEnv(env);
 			return t;
 		}
-
 	}
 
-	static class JDBCThread extends Thread
+	public static class BPJDBCContextEnv extends BPEnvDynamic
+	{
+		public final static String KEY_QUERY_AUTOSTOP = "Q_AUTOSTOP";
+
+		public String getName()
+		{
+			return "jdbccontext";
+		}
+
+		public BPJDBCContextEnv()
+		{
+			m_rawkeys.add(KEY_QUERY_AUTOSTOP);
+		}
+	}
+
+	public static class JDBCThread extends Thread
 	{
 		protected volatile BPResourceJDBCLink m_link;
 		protected Connection m_conn;
@@ -178,6 +211,7 @@ public class BPJDBCContextBase implements BPJDBCContext
 		protected ResultSet m_rs;
 		protected Statement m_st;
 		protected WeakReference<AtomicBoolean> m_stoprunflag;
+		protected volatile BPEnv m_env;
 
 		public JDBCThread(BPResourceJDBCLink link, Runnable r, WeakReference<AtomicBoolean> stoprunflag)
 		{
@@ -186,6 +220,25 @@ public class BPJDBCContextBase implements BPJDBCContext
 			m_stoprunflag = stoprunflag;
 			setDaemon(true);
 			setContextClassLoader(ClassUtil.getExtensionClassLoader());
+		}
+
+		public void setEnv(String key, String value)
+		{
+			if (m_env == null)
+				m_env = new BPJDBCContextEnv();
+			m_env.setEnv(key, value);
+		}
+
+		public void setEnv(BPEnv env)
+		{
+			if (m_env == null)
+				m_env = new BPJDBCContextEnv();
+			m_env.setMappedData(env.getMappedData());
+		}
+
+		public String getEnv(String key)
+		{
+			return m_env == null ? null : m_env.getValue(key);
 		}
 
 		public void setStartRun()

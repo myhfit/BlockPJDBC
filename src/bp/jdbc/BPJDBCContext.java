@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import bp.data.BPXYDData;
 import bp.data.BPXYData;
@@ -34,6 +35,8 @@ public interface BPJDBCContext extends Closeable
 	CompletionStage<Integer> execute(String sql, Object[] params);
 
 	CompletionStage<Boolean> interactiveBatchExecute(String sql, BiFunction<Integer, Exception, Object[]> callback);
+
+	<T> CompletionStage<T> runSegment(Supplier<T> seg);
 
 	void stopRunSQL();
 

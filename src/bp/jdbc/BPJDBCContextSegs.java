@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import bp.data.BPXData;
 import bp.data.BPXYDData;
 import bp.data.BPXYData;
+import bp.jdbc.BPJDBCContextBase.BPJDBCContextEnv;
 import bp.jdbc.BPJDBCContextBase.JDBCSeg;
 import bp.jdbc.BPJDBCContextBase.JDBCThread;
 import bp.res.BPResourceJDBCLink;
@@ -483,6 +484,7 @@ public class BPJDBCContextSegs
 			stopQuery(thread);
 			Connection conn = thread.getConnection();
 			BPJDBCQueryResult result = null;
+			boolean autostop = ObjUtil.toBool(thread.getEnv(BPJDBCContextEnv.KEY_QUERY_AUTOSTOP), false);
 			if (conn != null)
 			{
 				String sql = m_sql;
@@ -541,6 +543,9 @@ public class BPJDBCContextSegs
 
 					thread.setResultSet(rs);
 					thread.setStatement(st);
+
+					if (autostop)
+						stopQuery(thread);
 				}
 				catch (SQLException e)
 				{
