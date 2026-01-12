@@ -12,8 +12,8 @@ import bp.data.BPCommandResult;
 import bp.data.BPXYData;
 import bp.jdbc.BPJDBCContextBase;
 import bp.jdbc.SQLCMDTYPE;
-import bp.jdbc.BPJDBCContextBase.BPJDBCContextEnv;
-import bp.jdbc.BPJDBCContextBase.JDBCThread;
+import bp.jdbc.BPJDBCContext.BPJDBCContextEnv;
+import bp.jdbc.BPJDBCContext.JDBCThread;
 import bp.project.BPResourceProject;
 import bp.project.BPResourceProjectJDBC;
 import bp.res.BPResource;
@@ -69,7 +69,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 			}
 			if (jdbclink != null)
 			{
-				BPDBCLIContext context = new BPDBCLIContext((BPResourceJDBCLink) jdbclink);
+				BPJDBCLIContext context = new BPJDBCLIContext((BPResourceJDBCLink) jdbclink);
 				context.start();
 			}
 
@@ -109,7 +109,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 		return "JDBC";
 	}
 
-	protected static class BPDBCLIContext
+	protected static class BPJDBCLIContext
 	{
 		private volatile BPJDBCContextBase m_context;
 		private Function<String, BPCommandResult> m_cb;
@@ -120,7 +120,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 		private final static String CN_COMMIT = "commit";
 		private final static String CN_ROLLBACK = "rollback";
 
-		public BPDBCLIContext(BPResourceJDBCLink jdbclink)
+		public BPJDBCLIContext(BPResourceJDBCLink jdbclink)
 		{
 			m_context = new BPJDBCContextBase(jdbclink);
 			m_context.runSegment(() ->
