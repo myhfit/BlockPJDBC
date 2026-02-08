@@ -67,6 +67,11 @@ public class BPResourceJDBCLink extends BPResourceOverlay
 		}
 		return false;
 	}
+	
+	public int hashCode()
+	{
+		return m_res.hashCode();
+	}
 
 	public String toString()
 	{
