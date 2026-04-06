@@ -26,13 +26,13 @@ public class BPProjectFactoryJDBC implements BPProjectFactory
 	public List<String> getProjectTypes()
 	{
 		List<String> rc = new ArrayList<String>();
-		rc.add("jdbc");
+		rc.add(BPResourceProjectJDBC.PRJTYPE_JDBC);
 		return rc;
 	}
 
 	public boolean canHandle(String prjtype)
 	{
-		return prjtype.equalsIgnoreCase("jdbc");
+		return prjtype.equalsIgnoreCase(BPResourceProjectJDBC.PRJTYPE_JDBC);
 	}
 
 	public String getName()

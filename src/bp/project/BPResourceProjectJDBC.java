@@ -63,9 +63,14 @@ public class BPResourceProjectJDBC extends BPResourceProjectFile
 		return PRJTYPE_JDBC;
 	}
 
+	public boolean onlyListProjectItems()
+	{
+		return true;
+	}
+
 	public BPProjectItemFactory[] getItemFactories()
 	{
-		return new BPProjectItemFactory[] { new BPProjectItemJDBCFactory() };
+		return new BPProjectItemFactory[] { new BPProjectItemFactoryJDBC() };
 	}
 
 	public List<BPResource> getProjectFunctionItems()
@@ -104,7 +109,7 @@ public class BPResourceProjectJDBC extends BPResourceProjectFile
 		m_cachelinks = new CopyOnWriteArrayList<BPResourceJDBCLink>(jdbclinks);
 	}
 
-	public static class BPProjectItemJDBCFactory implements BPProjectItemFactory
+	public static class BPProjectItemFactoryJDBC implements BPProjectItemFactory
 	{
 		public String getName()
 		{

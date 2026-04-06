@@ -157,15 +157,63 @@ public class BPJDBCContextSegs
 			connect(thread);
 			Connection conn = getConnection();
 			ResultSet rs = null;
+			int mode=1;
 			try
 			{
-				rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE", "VIEW" });
-				ResultSetMetaData md = rs.getMetaData();
-				BPJDBCQueryResult result = BPJDBCQueryResult.createByMetaData(md);
-				if (result.read(rs, 0, 0))
+				if(mode==1)
 				{
-					List<BPXData> datas = result.getDatas();
-					return makeDBStruct(result.getColumnNames(), datas);
+					DBStruct dbs = new DBStruct();
+					rs = conn.getMetaData().getCatalogs();
+					List<String> catelogs = getCatelog(rs);
+					List<String> schemanames;
+					rs = conn.getMetaData().getSchemas();
+					schemanames = getSchemas(rs);
+					boolean iscat = false;
+					if (schemanames.size() == 0)
+					{
+						schemanames = catelogs;
+						iscat = true;
+					}
+					List<DBSchema> schemas = new ArrayList<DBSchema>();
+					dbs.tables = new ConcurrentHashMap<String, List<DBTable>>();
+					dbs.columns = new ConcurrentHashMap<String, DBColumnCache>();
+					if (schemanames.size() == 0)
+					{
+						schemanames.add("");
+					}
+					for (String s : schemanames)
+					{
+						schemas.add(new DBSchema(s));
+						dbs.tables.put(s, new ArrayList<DBTable>());
+					}
+					for (String s : schemanames)
+					{
+						if (iscat)
+							rs = conn.getMetaData().getTables(s, null, "%", new String[] { "TABLE", "VIEW" });
+						else
+							rs = conn.getMetaData().getTables(null, s, "%", new String[] { "TABLE", "VIEW" });
+						ResultSetMetaData md = rs.getMetaData();
+						BPJDBCQueryResult result = BPJDBCQueryResult.createByMetaData(md);
+						if (result.read(rs, 0, 0))
+						{
+							List<BPXData> datas = result.getDatas();
+							appendDBStruct(dbs, schemas, schemanames, s, result.getColumnNames(), datas);
+						}
+						rs.close();
+					}
+					dbs.schemas = new CopyOnWriteArrayList<DBSchema>(schemas);
+					return dbs;
+				}
+				else
+				{
+					rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE", "VIEW" });
+					ResultSetMetaData md = rs.getMetaData();
+					BPJDBCQueryResult result = BPJDBCQueryResult.createByMetaData(md);
+					if (result.read(rs, 0, 0))
+					{
+						List<BPXData> datas = result.getDatas();
+						return makeDBStruct(result.getColumnNames(), datas);
+					}
 				}
 			}
 			catch (SQLException e)
@@ -188,6 +236,105 @@ public class BPJDBCContextSegs
 				disconnect(thread);
 			}
 			return null;
+		}
+
+		protected List<String> getCatelog(ResultSet rs) throws SQLException
+		{
+			List<String> rc = new ArrayList<String>();
+			try
+			{
+				while (rs.next())
+				{
+					String s = rs.getString(1);
+					rc.add(s != null && s.length() == 0 ? null : s);
+				}
+			}
+			finally
+			{
+				try
+				{
+					rs.close();
+				}
+				catch (SQLException e)
+				{
+				}
+			}
+			return rc;
+		}
+
+		protected List<String> getSchemas(ResultSet rs) throws SQLException
+		{
+			List<String> rc = new ArrayList<String>();
+			try
+			{
+				while (rs.next())
+				{
+					String s = rs.getString(1);
+					rc.add(s != null && s.length() == 0 ? null : s);
+				}
+			}
+			finally
+			{
+				rs.close();
+			}
+			return rc;
+		}
+
+		protected void appendDBStruct(DBStruct dbs, List<DBSchema> schemas, List<String> schemanames, String defaultschema, String[] colnames, List<BPXData> datas)
+		{
+			if (colnames != null && datas != null)
+			{
+				Map<String, List<DBTable>> tables = dbs.tables;
+				Map<String, DBColumnCache> columns = dbs.columns;
+				int tncol = 0, sccol = 0, ttcol = 0;
+				for (int i = 0; i < colnames.length; i++)
+				{
+					String cn = colnames[i].toUpperCase();
+					if (cn.equals("TABLE_NAME"))
+					{
+						tncol = i;
+					}
+					else if (colnames[i].equalsIgnoreCase("TABLE_TYPE"))
+					{
+						ttcol = i;
+					}
+					else if (cn.equals("TABLE_SCHEM"))
+					{
+						sccol = i;
+					}
+				}
+				for (BPXData datax : datas)
+				{
+					Object[] data = datax.getValues();
+					Object schemao = data[sccol];
+					String schemaname = schemao != null ? schemao.toString() : defaultschema;
+					Object tnameo = data[tncol];
+					String tname = tnameo != null ? tnameo.toString() : "";
+					Object ttypeo = data[ttcol];
+					String ttype = ttypeo != null ? ttypeo.toString() : "";
+					List<DBTable> dts;
+					if (!schemanames.contains(schemaname))
+					{
+						schemas.add(new DBSchema(schemaname));
+						schemanames.add(schemaname);
+						dts = new ArrayList<DBTable>();
+						tables.put(schemaname, dts);
+					}
+					else
+					{
+						dts = tables.get(schemaname);
+					}
+					DBTable dt = new DBTable();
+					dt.name = tname;
+					if (ttype.equalsIgnoreCase("TABLE"))
+						dt.dstype = DBTableTypes.TABLE;
+					else if (ttype.equalsIgnoreCase("VIEW"))
+						dt.dstype = DBTableTypes.VIEW;
+					dts.add(dt);
+				}
+				dbs.tables.putAll(tables);
+				dbs.columns.putAll(columns);
+			}
 		}
 
 		protected DBStruct makeDBStruct(String[] colnames, List<BPXData> datas)

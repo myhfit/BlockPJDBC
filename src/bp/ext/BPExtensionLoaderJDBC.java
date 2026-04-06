@@ -4,6 +4,9 @@ import bp.BPCore;
 import bp.BPCore.BPPlatform;
 import bp.context.BPFileContext;
 import bp.core.BPCommandHandlerJDBC;
+import bp.locale.BPLocaleConstCJDBC;
+import bp.locale.BPLocaleHelperDirect;
+import bp.locale.BPLocaleHelpers;
 
 public class BPExtensionLoaderJDBC implements BPExtensionLoader
 {
@@ -31,6 +34,7 @@ public class BPExtensionLoaderJDBC implements BPExtensionLoader
 	{
 		if (BPCore.getPlatform() == BPPlatform.CLI)
 			BPCore.addCommandHandler(new BPCommandHandlerJDBC());
+		BPLocaleHelpers.registerHelper(BPLocaleHelperDirect.createHelper(BPLocaleConstCJDBC.class, null, BPLocaleConstCJDBC.PACK_COMPUTER_JDBC, null));
 	}
 
 	public String[] getDependencies()

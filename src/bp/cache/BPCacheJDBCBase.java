@@ -7,16 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import bp.BPCore;
 import bp.event.BPEventChannelBase;
 import bp.jdbc.BPJDBCContextBase;
-import bp.res.BPResourceJDBCLink;
 import bp.res.BPResource;
 import bp.res.BPResourceDBItem.BPResourceDBSchema;
 import bp.res.BPResourceDBItem.BPResourceDBTable;
+import bp.res.BPResourceJDBCLink;
 import bp.res.BPResourceJDBCLink.DBStruct;
 import bp.util.Std;
 
@@ -30,12 +28,12 @@ public class BPCacheJDBCBase extends BPCacheBase implements BPCacheJDBC
 
 	protected volatile String m_pathkey;
 
-	protected ExecutorService m_execs = Executors.newSingleThreadExecutor((r) ->
-	{
-		Thread t = new Thread();
-		t.setDaemon(true);
-		return t;
-	});
+//	protected ExecutorService m_execs = Executors.newSingleThreadExecutor((r) ->
+//	{
+//		Thread t = new Thread();
+//		t.setDaemon(true);
+//		return t;
+//	});
 
 	public int getEventChannelID()
 	{

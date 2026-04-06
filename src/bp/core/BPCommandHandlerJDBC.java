@@ -52,7 +52,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 
 	protected BPCommandResult useDB(String[] ps)
 	{
-		if (ps.length > 1)
+		if (ps != null && ps.length > 1)
 		{
 			String prjname = ps[0];
 			String dblinkname = ps[1];
@@ -72,7 +72,10 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 				BPJDBCLIContext context = new BPJDBCLIContext((BPResourceJDBCLink) jdbclink);
 				context.start();
 			}
-
+		}
+		else
+		{
+			return BPCommandResult.FAIL("Args err\ndb_use project_name dblink_name");
 		}
 		return BPCommandResult.OK(null);
 	}
