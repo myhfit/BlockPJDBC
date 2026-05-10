@@ -9,7 +9,6 @@ import bp.format.BPFormatSQL;
 import bp.format.BPFormatText;
 import bp.jdbc.BPJDBCContextBase;
 import bp.locale.BPLocaleConstCJDBC;
-import bp.locale.BPLocaleHelpers;
 import bp.res.BPResource;
 import bp.res.BPResourceHolder;
 import bp.res.BPResourceHolder.BPResourceHolderW;
@@ -63,7 +62,7 @@ public abstract class BPResourceProcessorSQL implements BPResourceProcessor<BPRe
 
 		public String getUILabel()
 		{
-			return BPLocaleHelpers.getValue(BPLocaleConstCJDBC.TestDB);
+			return BPLocaleConstCJDBC.TestDB.text();
 		}
 
 		public boolean canOutput(String format)

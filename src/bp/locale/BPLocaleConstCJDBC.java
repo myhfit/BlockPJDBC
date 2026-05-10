@@ -7,6 +7,15 @@ public enum BPLocaleConstCJDBC implements BPLocaleConstSimple
 	URL,
 	DB_Categories,
 	TestDB,
+	Connect,
+	Disconnect,
+	Connecting,
+	Disconnecting,
+	Fetching,
+	Query,
+	Execute,
+	Commit,
+	Rollback
 	;
 
 	public final static String PACK_COMPUTER_JDBC = "c_jdbc";
