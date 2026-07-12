@@ -1,6 +1,6 @@
 package bp.format;
 
-public class BPFormatJDBCLink implements BPFormat
+public class BPFormatJDBCLink extends BPFormatBase
 {
 	public final static String FORMAT_JDBCLINK = "JDBC Link";
 

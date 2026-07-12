@@ -677,7 +677,7 @@ public class BPJDBCContextSegs
 						rs = st.executeQuery(sql);
 					}
 					ResultSetMetaData md = rs.getMetaData();
-					result = BPJDBCQueryResult.createByMetaData(md);
+					result = BPJDBCQueryResult.createByMetaData(md, ObjUtil.toBool(thread.getEnv(BPJDBCContextEnv.KEY_QUERY_TRANSDBTYPE), false));
 					WeakReference<Consumer<BPXYDData>> pcallbackref = m_pcallback;
 					m_pcallback = null;
 					if (pcallbackref != null)
@@ -983,7 +983,7 @@ public class BPJDBCContextSegs
 				try
 				{
 					ResultSetMetaData md = rs.getMetaData();
-					result = BPJDBCQueryResult.createByMetaData(md);
+					result = BPJDBCQueryResult.createByMetaData(md, ObjUtil.toBool(thread.getEnv(BPJDBCContextEnv.KEY_QUERY_TRANSDBTYPE), false));
 					WeakReference<Consumer<BPXYDData>> pcallbackref = m_pcallback;
 					m_pcallback = null;
 					if (pcallbackref != null)
@@ -1023,7 +1023,7 @@ public class BPJDBCContextSegs
 				try
 				{
 					ResultSetMetaData md = rs.getMetaData();
-					result = BPJDBCQueryResult.createByMetaData(md);
+					result = BPJDBCQueryResult.createByMetaData(md, ObjUtil.toBool(thread.getEnv(BPJDBCContextEnv.KEY_QUERY_TRANSDBTYPE), false));
 					WeakReference<Consumer<BPXYDData>> pcallbackref = m_pcallback;
 					m_pcallback = null;
 					if (pcallbackref != null)

@@ -1,6 +1,6 @@
 package bp.format;
 
-public class BPFormatSQL implements BPFormat
+public class BPFormatSQL extends BPFormatBase
 {
 	public final static String FORMAT_SQL = "SQL";
 	public final static String MIME_SQL = "application/sql";

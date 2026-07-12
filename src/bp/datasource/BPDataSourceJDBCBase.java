@@ -12,12 +12,18 @@ import bp.jdbc.BPJDBCSyncContextBase;
 
 public class BPDataSourceJDBCBase implements BPDataSourceJDBC
 {
-	protected ThreadLocal<BPJDBCSyncContext> m_tlcons = new ThreadLocal<BPJDBCSyncContext>();
-	protected Queue<BPJDBCSyncContext> m_pool = new ConcurrentLinkedQueue<BPJDBCSyncContext>();
+	protected volatile ThreadLocal<BPJDBCSyncContext> m_tlcons;
+	protected volatile Queue<BPJDBCSyncContext> m_pool;
 	protected volatile int m_used;
 	protected volatile int m_all;
 	protected volatile int m_poolsize = 0;
 	protected volatile BPEnvJDBC m_env;
+
+	public BPDataSourceJDBCBase()
+	{
+		m_tlcons = new ThreadLocal<BPJDBCSyncContext>();
+		m_pool = new ConcurrentLinkedQueue<BPJDBCSyncContext>();
+	}
 
 	public void setPoolSize(int poolsize)
 	{

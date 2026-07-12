@@ -144,7 +144,7 @@ public class BPJDBCSyncContextBase implements BPJDBCSyncContext
 		}
 		return conn;
 	}
-
+	
 	protected final static void stopQuery(ResultSet rs, Statement st)
 	{
 		if (rs != null)
@@ -179,7 +179,50 @@ public class BPJDBCSyncContextBase implements BPJDBCSyncContext
 
 	public int execute(String sql, Object[] params)
 	{
-		return 0;
+		Connection conn = getConnection();
+		int rc = 0;
+		if (conn != null)
+		{
+			long t = writeQueryLog(sql, params);
+			long ct = t != 0 ? System.currentTimeMillis() : 0;
+			boolean isp = params != null && params.length > 0;
+			try (Statement st = isp ? conn.prepareStatement(sql) : conn.createStatement())
+			{
+				if (isp)
+				{
+					try (PreparedStatement ps = (PreparedStatement) st)
+					{
+						for (int i = 0; i < params.length; i++)
+						{
+							ps.setObject(i + 1, params[i]);
+						}
+						rc = ps.executeUpdate();
+					}
+					finally
+					{
+					}
+				}
+				else
+				{
+					st.executeUpdate(sql);
+				}
+				writeQueryLogEnd(t, ct);
+			}
+			catch (SQLException e)
+			{
+				throw new RuntimeException(e);
+			}
+			catch (RuntimeException | ThreadDeath e)
+			{
+				throw e;
+			}
+			catch (Exception e)
+			{
+				Std.err(e);
+				throw new RuntimeException(e);
+			}
+		}
+		return rc;
 	}
 
 	protected long writeQueryLog(String sql, Object[] params)
@@ -255,9 +298,6 @@ public class BPJDBCSyncContextBase implements BPJDBCSyncContext
 			}
 			catch (SQLException e)
 			{
-				stopQuery(rs, st);
-				rs = null;
-				st = null;
 				throw new RuntimeException(e);
 			}
 			catch (RuntimeException | ThreadDeath e)
@@ -267,14 +307,13 @@ public class BPJDBCSyncContextBase implements BPJDBCSyncContext
 			catch (Exception e)
 			{
 				Std.err(e);
-				stopQuery(rs, st);
-				rs = null;
-				st = null;
 				throw new RuntimeException(e);
 			}
 			finally
 			{
-
+				stopQuery(rs, st);
+				rs = null;
+				st = null;
 			}
 		}
 		return result;

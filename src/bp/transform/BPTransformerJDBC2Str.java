@@ -17,7 +17,7 @@ public class BPTransformerJDBC2Str extends BPTransformerBase<Object>
 			Clob clob = (Clob) t;
 			try
 			{
-				return clob.getSubString(0, (int) clob.length());
+				return clob.getSubString(1, (int) clob.length());
 			}
 			catch (SQLException e)
 			{

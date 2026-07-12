@@ -51,10 +51,13 @@ public interface BPJDBCContext extends Closeable
 	void close();
 
 	BPResourceJDBCLink getJDBCLink();
-	
+
+	BPEnv getEnv();
+
 	public static class BPJDBCContextEnv extends BPEnvDynamic
 	{
 		public final static String KEY_QUERY_AUTOSTOP = "Q_AUTOSTOP";
+		public final static String KEY_QUERY_TRANSDBTYPE = "Q_TRANSDBTYPE";
 
 		public String getName()
 		{
@@ -64,6 +67,7 @@ public interface BPJDBCContext extends Closeable
 		public BPJDBCContextEnv()
 		{
 			m_rawkeys.add(KEY_QUERY_AUTOSTOP);
+			m_rawkeys.add(KEY_QUERY_TRANSDBTYPE);
 		}
 	}
 
@@ -95,9 +99,7 @@ public interface BPJDBCContext extends Closeable
 
 		public void setEnv(BPEnv env)
 		{
-			if (m_env == null)
-				m_env = new BPJDBCContextEnv();
-			m_env.setMappedData(env.getMappedData());
+			m_env = env;
 		}
 
 		public String getEnv(String key)

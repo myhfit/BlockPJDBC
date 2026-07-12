@@ -10,10 +10,9 @@ import bp.cli.console.BPConsoleHandlerDynamic;
 import bp.data.BPCommand;
 import bp.data.BPCommandResult;
 import bp.data.BPXYData;
+import bp.jdbc.BPJDBCContext.BPJDBCContextEnv;
 import bp.jdbc.BPJDBCContextBase;
 import bp.jdbc.SQLCMDTYPE;
-import bp.jdbc.BPJDBCContext.BPJDBCContextEnv;
-import bp.jdbc.BPJDBCContext.JDBCThread;
 import bp.project.BPResourceProject;
 import bp.project.BPResourceProjectJDBC;
 import bp.res.BPResource;
@@ -126,12 +125,8 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 		public BPJDBCLIContext(BPResourceJDBCLink jdbclink)
 		{
 			m_context = new BPJDBCContextBase(jdbclink);
-			m_context.runSegment(() ->
-			{
-				JDBCThread t = (JDBCThread) Thread.currentThread();
-				t.setEnv(BPJDBCContextEnv.KEY_QUERY_AUTOSTOP, "true");
-				return null;
-			});
+			m_context.setEnv(BPJDBCContextEnv.KEY_QUERY_AUTOSTOP, "true");
+			m_context.setEnv(BPJDBCContextEnv.KEY_QUERY_TRANSDBTYPE, "true");
 			m_linkname = jdbclink.getName();
 			m_cb = this::callCommand;
 		}

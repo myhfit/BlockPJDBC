@@ -53,6 +53,11 @@ public class BPJDBCContextBase implements BPJDBCContext
 		m_env.setEnv(key, value);
 	}
 
+	public BPEnv getEnv()
+	{
+		return m_env;
+	}
+
 	public void close()
 	{
 		m_linkref = null;

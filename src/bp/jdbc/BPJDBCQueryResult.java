@@ -1,9 +1,12 @@
 package bp.jdbc;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -29,16 +32,28 @@ public class BPJDBCQueryResult extends BPXYDDataBase
 	protected final static int COLF_DATE = 9;
 	protected final static int COLF_TIME = 10;
 	protected final static int COLF_BYTES = 11;
+	protected final static int COLF_CLOB = 12;
+	protected final static int COLF_BLOB = 13;
+	protected final static int COLF_STRUCT = 14;
+
+	protected boolean m_transdbtype;
 
 	public final static BPJDBCQueryResult createByMetaData(ResultSetMetaData metadata)
 	{
+		return createByMetaData(metadata, false);
+	}
+
+	public final static BPJDBCQueryResult createByMetaData(ResultSetMetaData metadata, boolean transdbtype)
+	{
 		BPJDBCQueryResult rc = new BPJDBCQueryResult();
+		rc.m_transdbtype = transdbtype;
 		rc.initColumns(metadata);
 		return rc;
 	}
 
 	protected Class<?> mapColClass(int st)
 	{
+		boolean transdbtype = m_transdbtype;
 		switch (st)
 		{
 			case Types.BOOLEAN:
@@ -70,9 +85,9 @@ public class BPJDBCQueryResult extends BPXYDDataBase
 			case Types.TIMESTAMP:
 				return java.util.Date.class;
 			case Types.CLOB:
-				return String.class;
+				return transdbtype ? String.class : Clob.class;
 			case Types.BLOB:
-				return byte[].class;
+				return transdbtype ? byte[].class : Blob.class;
 		}
 		return Object.class;
 	}
@@ -170,7 +185,17 @@ public class BPJDBCQueryResult extends BPXYDDataBase
 						case COLF_BYTES:
 						{
 							oval = rs.getBytes(i1);
+							break;
 						}
+						case COLF_CLOB:
+							oval = rs.getObject(i1);
+							break;
+						case COLF_BLOB:
+							oval = rs.getObject(i1);
+							break;
+						case COLF_STRUCT:
+							oval = rs.getObject(i1);
+							break;
 						default:
 						{
 							oval = rs.getObject(i1);
@@ -232,49 +257,33 @@ public class BPJDBCQueryResult extends BPXYDDataBase
 		{
 			Class<?> cls = m_ccs[i];
 			if (cls == Boolean.class)
-			{
 				colff[i] = COLF_BOOLEAN;
-			}
 			else if (cls == String.class)
-			{
 				colff[i] = COLF_STRING;
-			}
 			else if (cls == Short.class)
-			{
 				colff[i] = COLF_SHORT;
-			}
 			else if (cls == Integer.class)
-			{
 				colff[i] = COLF_INT;
-			}
 			else if (cls == Float.class)
-			{
 				colff[i] = COLF_FLOAT;
-			}
 			else if (cls == Long.class)
-			{
 				colff[i] = COLF_LONG;
-			}
 			else if (cls == Double.class)
-			{
 				colff[i] = COLF_DOUBLE;
-			}
 			else if (cls == BigDecimal.class)
-			{
 				colff[i] = COLF_BIGDECIMAL;
-			}
 			else if (cls == java.util.Date.class)
-			{
 				colff[i] = COLF_DATE;
-			}
 			else if (cls == Time.class)
-			{
 				colff[i] = COLF_TIME;
-			}
 			else if (cls == byte[].class)
-			{
 				colff[i] = COLF_BYTES;
-			}
+			else if (cls == Clob.class)
+				colff[i] = COLF_CLOB;
+			else if (cls == Blob.class)
+				colff[i] = COLF_BLOB;
+			else if (cls == Struct.class)
+				colff[i] = COLF_STRUCT;
 		}
 		return colff;
 	}
