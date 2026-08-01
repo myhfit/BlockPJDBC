@@ -6,7 +6,6 @@ public enum BPLocaleConstCJDBC implements BPLocaleConstSimple
 	Driver,
 	URL,
 	DB_Categories,
-	TestDB,
 	Connect,
 	Disconnect,
 	Connecting,

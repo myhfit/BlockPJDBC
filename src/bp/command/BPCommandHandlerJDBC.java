@@ -1,4 +1,4 @@
-package bp.core;
+package bp.command;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,6 @@ import java.util.function.Function;
 import bp.BPCLICore;
 import bp.BPCore;
 import bp.cli.console.BPConsoleHandlerDynamic;
-import bp.data.BPCommand;
-import bp.data.BPCommandResult;
 import bp.data.BPXYData;
 import bp.jdbc.BPJDBCContext.BPJDBCContextEnv;
 import bp.jdbc.BPJDBCContextBase;
@@ -56,7 +54,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 			String prjname = ps[0];
 			String dblinkname = ps[1];
 			BPResourceProjectJDBC prj = (BPResourceProjectJDBC) BPCore.getProjectsContext().getProjectByName(prjname);
-			List<BPResource> ress = prj.getProjectFunctionItems();
+			BPResource[] ress = prj.getProjectFunctionItems();
 			BPResource jdbclink = null;
 			for (BPResource res : ress)
 			{
@@ -95,7 +93,7 @@ public class BPCommandHandlerJDBC extends BPCommandHandlerBase implements BPComm
 		StringBuilder sb = new StringBuilder();
 		for (BPResourceProjectJDBC prj : prjs)
 		{
-			List<BPResource> ress = prj.getProjectFunctionItems();
+			BPResource[] ress = prj.getProjectFunctionItems();
 			for (BPResource res : ress)
 			{
 				if (sb.length() > 0)

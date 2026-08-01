@@ -3,7 +3,7 @@ package bp.ext;
 import bp.BPCore;
 import bp.BPCore.BPPlatform;
 import bp.context.BPFileContext;
-import bp.core.BPCommandHandlerJDBC;
+import bp.command.BPCommandHandlerJDBC;
 import bp.locale.BPLocaleConstCJDBC;
 import bp.locale.BPLocaleHelperDirect;
 import bp.locale.BPLocaleHelpers;

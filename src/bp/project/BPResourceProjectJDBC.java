@@ -73,15 +73,13 @@ public class BPResourceProjectJDBC extends BPResourceProjectFile
 		return new BPProjectItemFactory[] { new BPProjectItemFactoryJDBC() };
 	}
 
-	public List<BPResource> getProjectFunctionItems()
+	public BPResource[] getProjectFunctionItems()
 	{
 		List<BPResource> rc = new ArrayList<BPResource>();
 		List<BPResourceJDBCLink> cachelinks = m_cachelinks;
 		if (cachelinks != null)
-		{
 			rc.addAll(cachelinks);
-		}
-		return rc;
+		return rc.toArray(new BPResource[rc.size()]);
 	}
 
 	public void refreshByCache(BPTreeCacheNode<BPCacheDataFileSystem> root)
